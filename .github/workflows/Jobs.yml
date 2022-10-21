@@ -52,9 +52,4 @@ jobs:
      #       webhook_url: ${{ secrets.WEBHOOK_URL }}
      #       options: "-H \"Accept: application/vnd.github.everest-preview+json\" -H \"Authorization: token ${{ secrets.WEBHOOK_TOKEN } -H \"Header: X-Hub-Signature-256 ${{ GITHUB_SHA }}\""
      
-      - name: Webhook
-        uses: distributhor/workflow-webhook@v2.0.3
-        env:
-         webhook_type: 'json-extended'
-         webhook_url: ${{ secrets.WEBHOOK_URL }}
-         webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
+     
