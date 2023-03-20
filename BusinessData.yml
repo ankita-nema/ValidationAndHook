@@ -10,7 +10,7 @@ info:
       3. Modify the business data display-name (see limitations)<br>
       4. Query the number of available fields<br><br>
       
-      Limitations: <br>
+      Limitations: 
       1. The number of fields that can be set is limited<br>
       - Number of "String" type is limited to 35<br>
       - Number of "Numeric" type is limited to 10<br>
