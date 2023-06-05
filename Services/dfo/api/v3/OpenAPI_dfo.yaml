@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: DFO API 3.0
-  version: '3.0'
+  version: V3
 servers:
   - url: 'https://api-de-{region}.niceincontact.com/dfo/3.0'
     description: Production API server
