@@ -1,0 +1,445 @@
+openapi: 3.0.0
+info:
+  version: 'V1'
+  title: 'access-key-management'
+  description: 'Micro Service for Access Managements test'
+  contact:
+    email: "userhub@nice.com"
+tags:
+  - name: AccessKeys
+    description: 'Access key management APIs'
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/nice-api
+    variables: {}
+  - url: https://api-na1.dev.niceincontact.com/access-key-management/V1
+    description: Dev Environment
+    variables: {}
+  - url: https://api-na1.test.niceincontact.com/access-key-management/V1
+    description: Test Environment
+    variables: {}
+  - url: https://api-nvir.test.niceincontact.com/access-key-management/V1
+    description: North Virginia Test Environment
+    variables: {}
+  - url: https://api-na1.staging.niceincontact.com/access-key-management/V1
+    description: Staging Environment
+    variables: {}
+  - url: https://api-na1.niceincontact.com/access-key-management/V1
+    description: Production Oregon Environment (uses live data)
+    variables: {}
+  - url: https://api-au1.niceincontact.com/access-key-management/V1
+    description: Production Australia Environment (uses live data)
+    variables: {}
+  - url: https://api-eu1.niceincontact.com/access-key-management/V1
+    description: Production Frankfurt Environment (uses live data)
+    variables: {}
+paths:
+  '/access-keys':
+    post:
+      x-cxone-api-key:  'be588e8e-8072-4982-8746-25e4e00b89a6'
+      x-cxone-audience: 'external-public'
+      x-cxone-productCatalogPermissions:
+        - accessKey: create
+        - myAccessKey: create
+      summary: Create an access key for a user
+      description: The purpose of this method is to create an access key for a user
+      operationId: createAccessKey
+      tags:
+        - AccessKeys
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/postCreateAccessKeyRequest'
+              
+      responses:
+        201:
+          description: Success, access key created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/postCreateAccessResponse'
+              example:
+                accessKey:
+                  accessKeyId: 0fe5a09d-f6bc-459e-a1b9-4b0bf7cc3cbb
+                  accessKeySecret: this is a secret
+                  userId: 396dfc4e-43c7-4ba1-b34c-885262a4d249
+                  tenantId: 948a33eb-cc1a-4296-8faf-fe2853a6203e
+                  agentId: 1000
+                  billingId: 3
+                  isActive: true
+        400:
+          description: Invalid Request. <span><p>o  tenantId does not exist</p><p>o  userId does not exist in the tenant</p><p>o  userId without tenantId or vice versa</p><p>o agentId without billingId or vice versa</p></span>
+        401:
+          description: Unauthorized. Invalid credentials.
+        403:
+          description: Forbidden. Access Denied
+    get:
+      x-cxone-api-key:  'be588e8e-8072-4992-8746-25e4e00b99a6'
+      x-cxone-audience: 'external-public'
+      x-cxone-productCatalogPermissions:
+        - accessKey: view
+        - myAccessKey: view
+      summary: Get access keys for given search criteria
+      description: 'This API takes below input and returns paginated records query'
+      operationId: search
+      tags:
+        - AccessKeys
+      parameters:
+            - name: userId
+              in: query
+              description: User Id allowed only if tenant-id is present
+              required: false
+              schema:
+                type: string
+                example: ddd0a5ce-8a23-4b8a-9a29-28dde50deab5
+            - name: agentId
+              in: query
+              description: Id of user at ACD allowed only if billing-id is present
+              required: false
+              schema:
+                type: integer
+                format: int32
+                example: 101
+            - name: skip
+              in: query
+              description : Number of  initial records to skip
+              required: true
+              schema:
+                 type: integer
+                 format: int32
+                 example: 2
+            - name: top
+              in: query
+              description : Number of records to return
+              required: true
+              schema:
+                  type: integer
+                  format: int32
+                  example: 2
+            - name: orderBy
+              in: query
+              description: Order of sorting of list based on attribute should be in the format -fieldName <direction>.  direction is optional. Allowed directions asc or desc
+              required: false
+              schema:
+                type: string
+                example: userId asc
+            - name: fields
+              in: query
+              description: Projection of access key attributes allowed field names accessKeyId,tenantId,userId,billingId,agentId,isActive,lastUsedDate
+              required: false
+              schema:
+                type: string
+                example: userId,accessKeyId
+      responses:
+              '200':
+                description: Success
+                content:
+                   application/json:
+                      schema:
+                        $ref: "#/components/schemas/AccessKeyListResponse"
+                      example:
+                        totalRecords: 1
+                        accessKeys:
+                           - accessKeyId: EIZ36IRAM7G63GYLZ4QMA7RB7J3Q7Q3XA4TDEWV34ZDTKFFHTOJA====
+                             userId: 11e91efd-00ea-1210-a74e-0242ac110002
+                             tenantId: 11e91ef8-be65-dc20-aef8-0242ac110005
+                             isActive: true
+                        _links:
+                             self: "https://api-na1.niceincontact.com/access-key-management/v1/access-keys?userId=11e91efd-00ea-1210-a74e-0242ac110002&page=0&sort=lastUsedDate,asc&fields=accessKeyId,tenantId,userId,isActive,lastUsedDate"
+                             next: 'abcd'
+                             previous: null
+              '400':
+                description: Validation error
+              '401':
+                description: Unauthorized
+              '403':
+                description: Insufficient permissions
+              '502':
+                description: Internal error
+  '/access-keys/validate':
+    post:
+      x-cxone-api-key:  'be588e8e-8081-4992-8746-25e4e00b99a6'
+      x-cxone-audience: 'external-public'
+      summary: Validates access key and access secret
+      description: 'This API validates access key and access secret. If valid, updates lastUsedDate and returns access key details'
+      operationId: validate
+      tags:
+        - AccessKeys
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccessKeyValidateRequest"
+           
+      responses:
+             '200':
+                description: Success
+                content:
+                    application/json:
+                      schema:
+                        $ref: "#/components/schemas/AccessKeyValidateResponse"
+                      example:
+                        userId: 11e91efd-00ea-1210-a74e-0242ac110002
+                        tenantId: 11e91ef8-be65-dc20-aef8-0242ac110005
+                        agentId: 101
+                        billingId: 1
+             '400':
+                description: Validation error
+             '401':
+                description: Unauthorized
+             '502':
+                description: Internal Error
+  "/access-keys/{accessKeyId}":
+    get:
+      x-cxone-api-key:  'be588e8e-8081-4782-9746-25e4e00b99a6'
+      x-cxone-audience: 'external-public'
+      x-cxone-productCatalogPermissions:
+        - accessKey: view
+        - myAccessKey: view
+      summary: Get access key details by its id
+      description: 'This API takes accessKeyId as a path variable and returns all details for matched record'
+      operationId: getById
+      tags:
+        - AccessKeys
+      parameters:
+         - name: accessKeyId
+           in: path
+           description : Access Key Id to fetch details for
+           required: true
+           schema:
+              type: string
+              example: EIZ36IRAM7G63GYLZ4QMA7RB7J3Q7Q3XA4TDEWV34ZDTKFFHTOJA====
+      responses:
+           '200':
+               description: Success
+               content:
+                  application/json:
+                      schema:
+                        $ref: "#/components/schemas/postCreateAccessResponse"
+                      example:
+                         accessKey:
+                             accessKeyId: 0fe5a09d-f6bc-459e-a1b9-4b0bf7cc3cbb
+                             accessKeySecret: this is a secret
+                             userId: 396dfc4e-43c7-4ba1-b34c-885262a4d249
+                             tenantId: 948a33eb-cc1a-4296-8faf-fe2853a6203e
+                             agentId: 1000
+                             billingId: 3
+                             lastUsedDate: 2019-03-27T09:29:37.623+0000
+                             isActive: true
+           '400':
+                description: Validation error
+           '401':
+                description: Unauthorized
+           '403':
+                description: Insufficient permissions
+           '404':
+                description: Not found
+           '502':
+                description: Internal error
+    delete:
+      x-cxone-audience: 'external-public'
+      x-cxone-api-key:  'be588e8e-8081-4782-9746-25e4e00b88a7'
+      x-cxone-productCatalogPermissions:
+        - accessKey: delete
+        - myAccessKey: delete
+      summary: Deletes access key record of given id
+      description: 'This API deletes access key record of given accessKeyId'
+      operationId: delete
+      tags:
+        - AccessKeys
+      parameters:
+        - name: accessKeyId
+          in: path
+          description : Access Key Id to delete
+          required: true
+          schema:
+            type: string
+            example: EIZ36IRAM7G63GYLZ4QMA7RB7J3Q7Q3XA4TDEWV34ZDTKFFHTOJA====
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BooleanResponse"
+              example:
+                success: true
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+        '403':
+          description: Insufficient permissions
+        '404':
+          description: Not found
+        '502':
+          description: Internal error
+    patch:
+      x-cxone-api-key:  'be588e8e-9081-4782-9856-25e4e00b99a6'
+      x-cxone-audience: 'external-public'
+      x-cxone-productCatalogPermissions:
+        - accessKey: edit
+        - myAccessKey: edit
+      summary: Updates status of given access key
+      description: This API updates the status of access key
+      operationId: update
+      tags:
+        - AccessKeys
+      parameters:
+        - name: accessKeyId
+          in: path
+          description : Access Key Id to update status for
+          required: true
+          schema:
+             type: string
+             example: EIZ36IRAM7G63GYLZ4QMA7RB7J3Q7Q3XA4TDEWV34ZDTKFFHTOJA====
+      requestBody:
+           content:
+              application/json:
+                  schema:
+                    $ref: '#/components/schemas/AccessKeyUpdateRequest'
+                  examples:
+                    jsonExample:
+                      summary: AccessKeyUpdateRequest
+                      value: {
+                                "isActive": true
+                              }
+      responses:
+        '200':
+          description: Success
+          content:
+             application/json:
+               schema:
+                 $ref: "#/components/schemas/BooleanResponse"
+               example:
+                 success: true
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+        '403':
+          description: Insufficient permissions
+        '404':
+          description: Not found
+        '502':
+          description: Internal error
+
+components:
+  # Reusable schemas (data models) both input and output
+  schemas: # allows the definition of input and output data types. These types can be objects, but also primitives and arrays
+    postCreateAccessKeyRequest:
+      title: ""
+      type: object
+      description:  With tenant-id userId needs to be passed and with billing-id agentId needs to be passed.
+      required:
+      - tenantId or billingId
+      properties:
+        userId:
+          type: string
+          description: Id of user on Cxone
+        tenantId:
+          type: string
+          description :  Id of tenant of User in Cxone
+        agentId:
+          type: integer
+          format: int32
+          description:  Id of User at ACD
+        billingId:
+          type: integer
+          format: int64
+          description:  Uniquie Id of tenant at ACD
+    postCreateAccessResponse:
+      title: ""
+      type: object
+      required:
+      - accessKey
+      properties:
+        accessKey:
+          $ref: '#/components/schemas/createAccessKeyResult'
+    AccessKeyListResponse:
+        title: ""
+        type: object
+        properties:
+          totalRecords:
+            type: integer
+            format: int32
+          accessKeys:
+            type: array
+            items:
+              "$ref": "#/components/schemas/createAccessKeyResult"
+          _links:
+            "$ref": "#/components/schemas/Links"
+    createAccessKeyResult:
+      type: object
+      properties:
+        accessKeyId:
+          type: string
+          description: Access Key Id
+        accessKeySecret:
+          type: string
+          description: Access Key Secret
+        userId:
+          type: string
+          description: UserId
+        tenantId:
+          type: string
+          description : Tenant Id
+        agentId:
+          type: integer
+          format: int32
+          description: Agent Id
+        billingId:
+          type: integer
+          format: int64
+          description: Billing Id
+        lastUsedDate:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
+          format: boolean
+          description: IsActive
+    AccessKeyValidateRequest:
+        type: object
+        properties:
+          accessKeyId:
+            type: string
+          accessKeySecret:
+            type: string
+    AccessKeyValidateResponse:
+        type: object
+        properties:
+          userId:
+            type: string
+          tenantId:
+            type: string
+          agentId:
+            type: integer
+            format: int32
+          billingId:
+            type: integer
+            format: int32
+    AccessKeyUpdateRequest:
+        type: object
+        properties:
+          isActive:
+            type: boolean
+    Links:
+        type: object
+        properties:
+          self:
+            type: string
+          next:
+            type: string
+          previous:
+            type: string
+    BooleanResponse:
+        type: object
+        properties:
+          success:
+            type: boolean
+          message:
+            type: string
+          error:
+            type: string
