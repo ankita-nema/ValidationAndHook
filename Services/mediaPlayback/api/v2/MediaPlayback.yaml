@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  description: You can use this API to access CXone recording media. Depending on the media type, you get the metadata and transcript, or a link to the media file. This API is generally used for playing back media.
+  description: You can use this API to access45 CXone recording media. Depending on the media type, you get the metadata and transcript, or a link to the media file. This API is generally used for playing back media.
   version: "V2"
   title: Media Playback API
   contact:
