@@ -4,7 +4,7 @@ info:
   version: V3
 servers:
   - url: 'https://api-de-{region}.niceincontact.com/dfo/3.0'
-    description: Production API server
+    description: Production API serverss
     variables:
       region:
         default: na1
