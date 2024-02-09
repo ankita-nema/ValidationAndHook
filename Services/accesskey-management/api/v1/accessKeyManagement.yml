@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: 'V1'
+  version: '123'
   title: 'access-key-management'
   description: 'Micro Service for Access Managements test'
   contact:
